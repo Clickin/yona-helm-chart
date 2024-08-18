@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  yona:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-08-18T21:45:45.0941081+09:00"
+    description: Yona is a web-based project hosting software.
+    digest: 1ef921bbac6674c434455ec65bd2edf99a46efa66fd3226eb84f296a7478f0a7
+    name: yona
+    type: application
+    urls:
+    - yona-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-08-18T21:45:45.0930845+09:00"
