@@ -1,0 +1,240 @@
+# Default values for yona.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Yona application configuration
+yona:
+  labels: {}
+  annotations: {}
+  javaOpts: "-Xmx2048m -Xms2048m"
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: "10Gi"
+    hostPath:
+      enabled: false
+      path: ""
+    existingClaim: ""
+  env:
+    siteName: "Yona"
+    allowAnonymousAccess: true
+    guestUserPrefix: ""
+
+    mail:
+      fromEmail: "projects.yona@gmail.com"
+      fromName: "yona-no-reply"
+
+    notification:
+      mailEnabled: true
+      mailInterval: "60s"
+      mailDelay: "180s"
+      mailRecipientLimit: 100
+      mailHideAddress: true
+      draftTime: "30s"
+
+    smtp:
+      host: "smtp.gmail.com"
+      port: 465
+      ssl: true
+      user: "yourGmailId"
+      existingSecret: ""
+      password: "yourGmailPassword"
+      domain: "gmail.com"
+      mock: true
+      archiveSize: 5
+
+    imap:
+      use: false
+      host: "imap.googlemail.com"
+      ssl: true
+      user: "your-yona-email-address@gmail.com"
+      address: "your-yona-email-address@gmail.com"
+      existingSecret: ""
+      password: "yourGmailPassword"
+      folder: "Inbox"
+
+    database:
+      driver: "org.mariadb.jdbc.Driver"
+      # applied only if mariadb.enabled is false
+      url: "jdbc:mariadb://127.0.0.1:3306/yona?useServerPrepStmts=true"
+      # applied only if mariadb.enabled is false
+      user: "yona"
+      # applied only if mariadb.enabled is false
+      password: "password"
+
+    production:
+      httpPort: 80
+      logLevel: "INFO"
+      mode: "prod"
+
+    update:
+      notificationInterval: "6h"
+      checkUse: true
+      repositoryUrl: "https://github.com/yona-projects/yona"
+      releaseUrlFormat: "https://github.com/yona-projects/yona/releases/tag/v%s"
+
+    application:
+      noReferrer: true
+      displayPrivateRepositories: false
+      hideProjectListing: false
+      showUserEmail: true
+      sendYonaUsage: true
+      secret: "VA2v:_I=h9>?FYOH:@ZhW]01P<mWZAKlQ>kk>Bo`mdCiA>pDw64FcBuZdDh<47Ew"
+      langs: "en-US, ko-KR, ja-JP, ru-RU, uz-UZ"
+      global: "Global"
+      server:
+        name: "Play/2.3"
+        scheme: "http"
+        # ignored when ingress is set
+        hostName: "www.yourwebsite.com"
+
+    project:
+      defaultScope: "public"
+      creationMenus: "issue, milestone, board"
+
+    github:
+      allowMigration: false
+      clientId: "TYPE YOUR GITHUB CILENT ID"
+      existingSecret: ""
+      clientSecret: "TYPE YOUR GITHUB CILENT SECRET"
+
+    maxFileSize: 2147483454
+
+    socialLogin:
+      useOnly: false
+      nameSync: false
+      providers: "github, google"
+
+    ldap:
+      use: false
+      host: "ldap.forumsys.com"
+      port: 389
+      protocol: "ldap"
+      baseDN: "ou=scientists,dc=example,dc=com"
+      dnPostfix: "OU=user,DC=abc,DC=com"
+      loginProperty: "sAMAccountName"
+      displayNameProperty: "displayName"
+      userNameProperty: "CN"
+      emailProperty: "mail"
+      useEmailBaseLogin: false
+      fallbackToLocalLogin: false
+      englishNameAttribute: "givenName"
+
+    slack:
+      colors:
+        newIssue: ""
+        issueStateChanged: ""
+        issueAssigneeChanged: ""
+        issueBodyChanged: ""
+        issueMoved: ""
+        issueMilestoneChanged: ""
+        newComment: ""
+        commentUpdated: ""
+        newPullRequest: ""
+        pullRequestStateChanged: ""
+        pullRequestMerged: ""
+        pullRequestCommitChanged: ""
+        pullRequestReviewStateChanged: ""
+
+  socialLogin:
+    account:
+      mergeEnabled: false
+      autoLink: true
+
+    google:
+      redirectUriSecure: false
+      clientId: "300340907286-8gr74ghhenrqgk2ioavjip36qm2bbvn1.apps.googleusercontent.com"
+      existingSecret: ""
+      clientSecret: "ocFoKh7De6nDQm1x-lGxcGRO"
+
+    github:
+      redirectUriSecure: false
+      clientId: "add60851e36488138581"
+      existingSecret: ""
+      clientSecret: "3f9472dcd7cb4c3c09e06b03f97f1b5fe2315af3"
+
+replicaCount: 1
+
+image:
+  repository: clickin/docker-yona
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "1.16.0"
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # nginx.ingress.kubernetes.io/proxy-body-size: 100m # increase nginx body size limit
+  hosts:
+    - host: chart-example.yona
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.yona
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /-_-api/v1/hello
+    port: http
+  initialDelaySeconds: 10
+readinessProbe:
+  httpGet:
+    path: /-_-api/v1/hello
+    port: http
+  initialDelaySeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: ""
+  targetMemoryUtilizationPercentage: ""
+
+mariadb:
+  enabled: true
+  databaseName: yona
+  userName: yona
+  port: 3306
+  persistence:
+    enabled: true
+    storageClassName: ""
+    size: "10Gi"
+    existingClaim: ""
+    hostPath:
+      enabled: false
+      path: ""
+  auth:
+    existingSecret: ""
+    password: "yona"
+    rootPassword: "yona"
+
+timezone: Asia/Seoul

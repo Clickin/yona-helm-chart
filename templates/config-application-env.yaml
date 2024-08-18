@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "yona.fullname" . }}-application-env"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "yona.labels" . | nindent 4 }}
+data:
+  YONA_SITE_NAME: {{ .Values.yona.env.siteName | quote }}
+  YONA_ALLOW_ANONYMOUS_ACCESS: {{ .Values.yona.env.allowAnonymousAccess | quote }}
+  YONA_GUEST_USER_PREFIX: {{ .Values.yona.env.guestUserPrefix | quote}}
+  YONA_APPLICATION_SECRET: {{ .Values.yona.env.application.secret | quote }}
+  YONA_APPLICATION_LANGS: {{ .Values.yona.env.application.langs | quote }}
+  YONA_APPLICATION_GLOBAL: {{ .Values.yona.env.application.global | quote}}
+  YONA_APPLICATION_SERVER: {{ .Values.yona.env.application.server.name | quote }}
+  YONA_APPLICATION_SCHEME: {{ .Values.yona.env.application.server.scheme | quote }}
+  {{- if and .Values.ingress.enabled .Values.ingress.hosts }}
+  {{- with (first .Values.ingress.hosts) }}
+  YONA_APPLICATION_HOSTNAME: {{ .host | quote }}
+  {{- end }}
+  {{- else }}
+  YONA_APPLICATION_HOSTNAME: {{ .Values.yona.env.application.server.hostName | quote }}
+  {{- end}}
+  YONA_MAIL_FROM_EMAIL: {{ .Values.yona.env.mail.fromEmail | quote}}
+  YONA_MAIL_FROM_NAME: {{ .Values.yona.env.mail.fromName | quote }}
+  YONA_NOTIFICATION_MAIL_ENABLED: {{ .Values.yona.env.notification.mailEnabled | quote }}
+  YONA_NOTIFICATION_MAIL_INTERVAL: {{ .Values.yona.env.notification.mailInterval | quote}}
+  YONA_NOTIFICATION_MAIL_DELAY: {{ .Values.yona.env.notification.mailDelay | quote }}
+  YONA_NOTIFICATION_MAIL_RECIPIENT_LIMIT: {{ .Values.yona.env.notification.mailRecipientLimit | quote }}
+  YONA_NOTIFICATION_MAIL_HIDE_ADDRESS: {{ .Values.yona.env.notification.mailHideAddress | quote }}
+  YONA_NOTIFICATION_DRAFT_TIME: {{ .Values.yona.env.notification.draftTime | quote }}
+  YONA_SMTP_HOST: {{ .Values.yona.env.smtp.host | quote }}
+  YONA_SMTP_PORT: {{ .Values.yona.env.smtp.port | quote }}
+  YONA_SMTP_SSL: {{ .Values.yona.env.smtp.ssl | quote }}
+  YONA_SMTP_USER: {{ .Values.yona.env.smtp.user | quote }}
+  YONA_SMTP_DOMAIN: {{ .Values.yona.env.smtp.domain | quote }}
+  YONA_SMTP_MOCK: {{ .Values.yona.env.smtp.mock | quote }}
+  YONA_SMTP_ARCHIVE_SIZE: {{ .Values.yona.env.smtp.archiveSize | quote }}
+  YONA_IMAP_USE: {{ .Values.yona.env.imap.use | quote }}
+  YONA_IMAP_HOST: {{ .Values.yona.env.imap.host | quote }}
+  YONA_IMAP_USER: {{ .Values.yona.env.imap.user | quote }}
+  YONA_IMAP_ADDRESS: {{ .Values.yona.env.imap.address | quote }}
+  YONA_IMAP_FOLDER: {{ .Values.yona.env.imap.folder | quote }}
+  YONA_DB_DRIVER: {{ .Values.yona.env.database.driver | quote }}
+  {{- if .Values.mariadb.enabled }}
+  {{- $dbPort := (.Values.mariadb.port | int) }}
+  {{- $dbUrl := printf "jdbc:mariadb://%s-db:%d/%s?useServerPrepStmts=true" (include "yona.fullname" .) $dbPort .Values.mariadb.databaseName }}
+  YONA_DB_URL: {{ $dbUrl | quote }} 
+  {{- else }}
+  YONA_DB_URL: {{ .Values.yona.env.database.url | quote }}
+  {{- end }}
+  {{- if .Values.mariadb.enabled }}
+  YONA_DB_USER: {{ .Values.mariadb.userName | quote }}
+  {{- else }}
+  YONA_DB_USER: {{ .Values.yona.env.database.user | quote }}
+  {{- end }}
+  #YONA_DB_PASSWORD is a secret
+  YONA_PROD_HTTP_PORT: {{ .Values.yona.env.production.httpPort | quote }}
+  YONA_PROD_LOG_LEVEL: {{ .Values.yona.env.production.logLevel | quote }}
+  YONA_PROD_MODE: {{ .Values.yona.env.production.mode | quote }}
+  YONA_UPDATE_NOTIFICATION_INTERVAL: {{ .Values.yona.env.update.notificationInterval | quote }}
+  YONA_UPDATE_CHECK_USE: {{ .Values.yona.env.update.checkUse | quote }}
+  YONA_UPDATE_REPOSITORY_URL: {{ .Values.yona.env.update.repositoryUrl | quote }}
+  YONA_UPDATE_RELEASE_URL_FORMAT: {{ .Values.yona.env.update.releaseUrlFormat | quote }}
+  YONA_NO_REFERRER: {{ .Values.yona.env.application.noReferrer | quote }}
+  YONA_DISPLAY_PRIVATE_REPOS: {{ .Values.yona.env.application.displayPrivateRepositories | quote }}
+  YONA_HIDE_PROJECT_LISTING: {{ .Values.yona.env.application.hideProjectListing | quote }}
+  YONA_SHOW_USER_EMAIL: {{ .Values.yona.env.application.showUserEmail | quote }}
+  YONA_SEND_USAGE_DATA: {{ .Values.yona.env.application.sendYonaUsage | quote }}
+  YONA_DEFAULT_PROJECT_SCOPE: {{ .Values.yona.env.project.defaultScope | quote }}
+  YONA_PROJECT_CREATION_MENUS: {{ .Values.yona.env.project.creationMenus | quote }}
+  YONA_GITHUB_MIGRATION_ALLOWED: {{ .Values.yona.env.github.allowMigration | quote }}
+  YONA_GITHUB_CLIENT_ID: {{ .Values.yona.env.github.clientId | quote }}
+  {{- $maxFileSize := .Values.yona.env.maxFileSize | int }}
+  YONA_MAX_FILE_SIZE: {{ $maxFileSize | quote }}
+  YONA_USE_SOCIAL_LOGIN_ONLY: {{ .Values.yona.env.socialLogin.useOnly | quote }}
+  YONA_SOCIAL_LOGIN_NAME_SYNC: {{ .Values.yona.env.socialLogin.nameSync | quote }}
+  YONA_SOCIAL_LOGIN_PROVIDERS: {{ .Values.yona.env.socialLogin.providers | quote }}
+  YONA_USE_LDAP_LOGIN: {{ .Values.yona.env.ldap.use | quote }}
+  YONA_LDAP_HOST: {{ .Values.yona.env.ldap.host | quote }}
+  YONA_LDAP_PORT: {{ .Values.yona.env.ldap.port | quote }}
+  YONA_LDAP_PROTOCOL: {{ .Values.yona.env.ldap.protocol | quote }}
+  YONA_LDAP_BASE_DN: {{ .Values.yona.env.ldap.baseDN | quote }}
+  YONA_LDAP_DN_POSTFIX: {{ .Values.yona.env.ldap.dnPostfix | quote }}
+  YONA_LDAP_LOGIN_PROPERTY: {{ .Values.yona.env.ldap.loginProperty | quote }}
+  YONA_LDAP_DISPLAY_NAME_PROPERTY: {{ .Values.yona.env.ldap.displayNameProperty | quote }}
+  YONA_LDAP_USERNAME_PROPERTY: {{ .Values.yona.env.ldap.userNameProperty | quote }}
+  YONA_LDAP_EMAIL_PROPERTY: {{ .Values.yona.env.ldap.emailProperty | quote }}
+  YONA_LDAP_USE_EMAIL_BASE_LOGIN: {{ .Values.yona.env.ldap.useEmailBaseLogin | quote }}
+  YONA_LDAP_FALLBACK_TO_LOCAL_LOGIN: {{ .Values.yona.env.ldap.fallbackToLocalLogin | quote }}
+  YONA_LDAP_ENGLISH_NAME_ATTRIBUTE: {{ .Values.yona.env.ldap.englishNameAttribute | quote }}
+  YONA_SLACK_COLOR_NEW_ISSUE: {{ .Values.yona.env.slack.colors.newIssue | quote }}
+  YONA_SLACK_COLOR_ISSUE_STATE_CHANGED: {{ .Values.yona.env.slack.colors.issueStateChanged | quote }}
+  YONA_SLACK_COLOR_ISSUE_ASSIGNEE_CHANGED: {{ .Values.yona.env.slack.colors.issueAssigneeChanged | quote }}
+  YONA_SLACK_COLOR_ISSUE_BODY_CHANGED: {{ .Values.yona.env.slack.colors.issueBodyChanged | quote }}
+  YONA_SLACK_COLOR_ISSUE_MOVED: {{ .Values.yona.env.slack.colors.issueMoved | quote }}
+  YONA_SLACK_COLOR_ISSUE_MILESTONE_CHANGED: {{ .Values.yona.env.slack.colors.issueMilestoneChanged | quote }}
+  YONA_SLACK_COLOR_NEW_COMMENT: {{ .Values.yona.env.slack.colors.newComment | quote }}
+  YONA_SLACK_COLOR_COMMENT_UPDATED: {{ .Values.yona.env.slack.colors.commentUpdated | quote }}
+  YONA_SLACK_COLOR_NEW_PULL_REQUEST: {{ .Values.yona.env.slack.colors.newPullRequest | quote }}
+  YONA_SLACK_COLOR_PULL_REQUEST_STATE_CHANGED: {{ .Values.yona.env.slack.colors.pullRequestStateChanged | quote }}
+  YONA_SLACK_COLOR_PULL_REQUEST_MERGED: {{ .Values.yona.env.slack.colors.pullRequestMerged | quote }}
+  YONA_SLACK_COLOR_PULL_REQUEST_COMMIT_CHANGED: {{ .Values.yona.env.slack.colors.pullRequestCommitChanged | quote }}
+  YONA_SLACK_COLOR_PULL_REQUEST_REVIEW_STATE_CHANGED: {{ .Values.yona.env.slack.colors.pullRequestReviewStateChanged | quote }}

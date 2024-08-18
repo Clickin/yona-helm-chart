@@ -1,0 +1,158 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "yona.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "yona.labels" . | nindent 4 }}
+  {{- with .Values.yona.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "yona.selectorLabels" . | nindent 6 }}
+  template:
+    {{- if .Values.mariadb.enabled }}
+    # Wait for the database to be ready
+    initConainers:
+      - name: wait-db
+        image: busybox:1.28
+        command:
+        - /bin/sh
+        - -c
+        - "for i in {1..100}; do sleep 1; if nc -z {{ include "yona.fullname" . }}-db 3306; then exit 0; fi; done; exit 1"
+    {{- end }}
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "yona.labels" . | nindent 8}}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{ toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: yona-data
+            mountPath: /yona/data
+          - name: yona-conf-volume
+            mountPath: /yona/data/conf
+            readOnly: true
+          envFrom: 
+          - configMapRef:
+              name: "{{ include "yona.fullname" . }}-application-env"
+          - configMapRef:
+              name: "{{ include "yona.fullname" . }}-social-login-env"
+          env:
+          - name: BEFORE_SCRIPT
+            value: before.sh
+          - name: JAVA_OPTS
+            value: {{ .Values.yona.javaOpts | quote }}
+          - name: YONA_DB_PASSWORD
+            {{- if .Values.mariadb.enabled }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "yona.fullname" . }}-db-secret
+                key: MARIADB_PASSWORD
+            {{- else }}
+            value: {{ .Values.yona.env.database.password | quote }}
+            {{- end }}
+          - name: YONA_GITHUB_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                {{- if .Values.yona.env.github.existingSecret}}
+                name: {{ .Values.yona.env.github.existingSecret }}
+                {{- else}}
+                name: "{{ include "yona.fullname" . }}-github-secret" 
+                {{- end }}
+                key: YONA_GITHUB_CLIENT_SECRET
+          - name: YONA_IMAP_PASSOWRD
+            valueFrom:
+              secretKeyRef:
+                {{- if .Values.yona.env.imap.existingSecret}}
+                name: {{ .Values.yona.env.imap.existingSecret }}
+                {{- else}}
+                name: "{{ include "yona.fullname" . }}-imap-secret" 
+                {{- end }}
+                key: YONA_IMAP_PASSWORD
+          - name: YONA_SMTP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                {{- if .Values.yona.env.smtp.existingSecret}}
+                name: {{ .Values.yona.env.smtp.existingSecret }}
+                {{- else}}
+                name: "{{ include "yona.fullname" . }}-smtp-secret" 
+                {{- end }}
+                key: YONA_SMTP_PASSWORD
+          - name: YONA_SOCIAL_LOGIN_GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                {{- if .Values.yona.socialLogin.google.existingSecret}}
+                name: {{ .Values.yona.socialLogin.google.existingSecret }}
+                {{- else}}
+                name: "{{ include "yona.fullname" . }}-social-google-secret" 
+                {{- end }}
+                key: YONA_SOCIAL_LOGIN_GOOGLE_CLIENT_SECRET
+          - name: YONA_SOCIAL_LOGIN_GITHUB_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                {{- if .Values.yona.socialLogin.github.existingSecret}}
+                name: {{ .Values.yona.socialLogin.github.existingSecret }}
+                {{- else}}
+                name: "{{ include "yona.fullname" . }}-social-github-secret" 
+                {{- end }}
+                key: YONA_SOCIAL_LOGIN_GITHUB_CLIENT_SECRET
+      volumes:
+        - name: yona-data
+        {{- if .Values.yona.persistence.enabled }}
+          {{- if .Values.yona.persistence.hostPath.enabled }}
+          hostPath:
+            path: {{ .Values.yona.persistence.hostPath.path }}
+            type: DirectoryOrCreate
+          {{- else }}
+          persistentVolumeClaim:
+            {{- if .Values.yona.persistence.existingClaim }}
+            claimName: {{ .Values.yona.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "yona.fullname" . }}-claim
+            {{- end }}  
+          {{- end }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        - name: yona-conf-volume
+          projected:
+            sources:
+            - configMap:
+                name: "{{ include "yona.fullname" . }}-conf"
+                items:
+                - key: application.conf
+                  path: application.conf
+                - key: application-logger.xml
+                  path: application-logger.xml
+                - key: social-login.conf
+                  path: social-login.conf

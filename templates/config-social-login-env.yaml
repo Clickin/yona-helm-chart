@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "yona.fullname" . }}-social-login-env"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "yona.labels" . | nindent 4 }}
+data:
+  YONA_SOCIAL_LOGIN_ACOOUNT_MERGE_ENABLED: {{ .Values.yona.socialLogin.account.mergeEnabled | quote }}
+  YONA_SOCIAL_LOGIN_ACCOUNT_AUTO_LINK: {{ .Values.yona.socialLogin.account.autoLink | quote }}
+  YONA_SOCIAL_LOGIN_GOOGLE_REDIRECT_URI_SECURE: {{ .Values.yona.socialLogin.google.redirectUriSecure | quote }}
+  YONA_SOCIAL_LOGIN_GOOGLE_CLIENT_ID: {{ .Values.yona.socialLogin.google.clientId | quote }}
+  # YONA_SOCIAL_LOGIN_GOOGLE_CLIENT_SECRET from secret
+  YONA_SOCIAL_LOGIN_GITHUB_REDIRECT_URI_SECURE: {{ .Values.yona.socialLogin.github.redirectUriSecure | quote }}
+  YONA_SOCIAL_LOGIN_GITHUB_CLIENT_ID: {{ .Values.yona.socialLogin.github.clientId | quote }}
+  # YONA_SOCIAL_LOGIN_GITHUB_CLIENT_SECRET from secret

@@ -1,0 +1,16 @@
+{{- if and .Values.mariadb.persistence.enabled (not .Values.mariadb.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ include "yona.fullname" . }}-db-claim"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "yona.mariadb.labels" . | nindent 4 }}
+spec:
+    accessModes:
+    - ReadWriteOnce
+    storageClassName: {{ .Values.mariadb.persistence.storageClass | default "" }}
+    resources:
+      requests:
+        storage: {{ .Values.mariadb.persistence.size }}
+{{- end }}

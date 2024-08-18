@@ -1,0 +1,14 @@
+{{- if and .Values.mariadb.persistence.enabled (not (or .Values.yona.persistence.existingClaim .Values.yona.persistence.hostPath.enabled)) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ include "yona.fullname" . }}-claim"
+  namespace: {{ .Release.Namespace }}
+spec:
+    accessModes:
+    - ReadWriteOnce
+    storageClassName: {{ .Values.yona.persistence.storageClassName | default "" }}
+    resources:
+      requests:
+        storage: {{ .Values.yona.persistence.size }}
+{{- end }}

@@ -1,0 +1,72 @@
+{{- if .Values.mariadb.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ include "yona.fullname" . }}-db"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "yona.mariadb.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "yona.mariadb.selectorLabels" . | nindent 6 }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "yona.mariadb.selectorLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 10 
+      containers:
+      - name: mariadb
+        image: mariadb:10.3
+        args:
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_unicode_ci
+        ports:
+        - name: mariadb
+          protocol: TCP
+          containerPort: {{ .Values.mariadb.port }}
+        env:
+        - name: MARIADB_DATABASE
+          value: {{ .Values.mariadb.databaseName }}
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if .Values.mariadb.auth.existingSecret }}
+              name: {{ .Values.mariadb.auth.existingSecret }}
+              {{- else }}
+              name: "{{ include "yona.fullname" . }}-db-secret"
+              {{- end }}
+              key: MARIADB_PASSWORD
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if .Values.mariadb.auth.existingSecret }}
+              name: {{ .Values.mariadb.auth.existingSecret }}
+              {{- else }}
+              name: "{{ include "yona.fullname" . }}-db-secret"
+              {{- end }}
+              key: MARIADB_ROOT_PASSWORD 
+        - name: MARIADB_USER
+          value: {{ .Values.mariadb.userName }}
+        - name: TZ
+          value: {{ .Values.timezone }}
+        volumeMounts:
+        - name: mariadb-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mariadb-storage
+        {{- if .Values.mariadb.persistence.hostPath.enabled }}
+        hostPath:
+          path: {{ .Values.mariadb.persistence.hostPath.path }}
+          type: DirectoryOrCreate
+        {{- else }}
+        persistentVolumeClaim:
+          {{- if .Values.mariadb.persistence.existingClaim }}
+          claimName: {{ .Values.mariadb.persistence.existingClaim }}
+          {{- else }}
+          claimName: "{{ include "yona.fullname" . }}-db-claim"
+          {{- end }}
+        {{- end }}
+{{- end }}      

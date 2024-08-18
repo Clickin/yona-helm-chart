@@ -1,0 +1,304 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "yona.fullname" .}}-conf"
+  namespace: {{ .Release.Namespace }}
+  annotations: {}
+  labels: 
+    {{- include "yona.labels" . | nindent 4 }}
+data:
+  application.conf: |
+    # This is the main configuration file for the application.
+    # ~~~~~
+
+    # Site Name
+    # ~~~~~~~~~
+    # The name of your website
+    application.siteName=${?YONA_SITE_NAME}
+
+    # Application Context
+    # ~~~~~~~~~~~~~~~~~~~
+    # If you want your own application context root, you can set it.
+    # Don't miss first / (slash) letter!
+    # application.context = ${?YONA_APP_CONTEXT}
+
+    # Anonymous access
+    # ~~~~~~~~~~~~~~~~
+    application.allowsAnonymousAccess=${?YONA_ALLOW_ANONYMOUS_ACCESS}
+
+    # Guest User Id Rule
+    # ~~~~~~~~~~~~~
+    application.guest.user.login.id.prefix=${?YONA_GUEST_USER_PREFIX}
+
+    # Signup options
+    # ~~~~~~~~~~~~~~
+    # signup.require.admin.confirm=${?YONA_SIGNUP_REQUIRE_ADMIN_CONFIRM}
+    # application.allowed.sending.mail.domains=${?YONA_ALLOWED_MAIL_DOMAINS}
+    # application.use.email.verification=${?YONA_USE_EMAIL_VERIFICATION}
+
+    # Login form custom input message
+    # application.login.page.loginId.placeholder=${?YONA_LOGIN_ID_PLACEHOLDER}
+    # application.login.page.password.placeholder=${?YONA_PASSWORD_PLACEHOLDER}
+
+    play-easymail {
+      from {
+        email=${?YONA_MAIL_FROM_EMAIL}
+        name=${?YONA_MAIL_FROM_NAME}
+      }
+    }
+
+    # Notification
+    notification.bymail.enabled=${?YONA_NOTIFICATION_MAIL_ENABLED}
+
+    # Secret key
+    application.secret=${?YONA_APPLICATION_SECRET}
+
+    # The application languages
+    application.langs=${?YONA_APPLICATION_LANGS}
+
+    # Global object class
+    application.global=${?YONA_APPLICATION_GLOBAL}
+
+    ebeanconfig.datasource=${?YONA_EBEAN_DATASOURCE}
+    # Database configuration
+    db.default.driver=${?YONA_DB_DRIVER}
+    db.default.url=${?YONA_DB_URL}
+    db.default.user=${?YONA_DB_USER}
+    db.default.password=${?YONA_DB_PASSWORD}
+
+    # Ebean configuration
+    ebean.default="models.*"
+
+    # Evolutions
+    applyEvolutions.default=true
+
+    # Server
+    application.server=${?YONA_APPLICATION_SERVER}
+    application.scheme=${?YONA_APPLICATION_SCHEME}
+    application.hostname=${?YONA_APPLICATION_HOSTNAME}
+    # application.port=${?YONA_APPLICATION_PORT}
+
+    # Application feedback url
+    application.feedback.url="https://github.com/yona-projects/yona/issues"
+
+    # Mailer
+    smtp.host=${?YONA_SMTP_HOST}
+    smtp.port=${?YONA_SMTP_PORT}
+    smtp.ssl=${?YONA_SMTP_SSL}
+    smtp.user=${?YONA_SMTP_USER}
+    smtp.password=${?YONA_SMTP_PASSWORD}
+    smtp.domain=${?YONA_SMTP_DOMAIN}
+    smtp.mock=${?YONA_SMTP_MOCK}
+    smtp.archive.size=${?YONA_SMTP_ARCHIVE_SIZE}
+
+    # Mailbox Service
+    imap.use=${?YONA_IMAP_USE}
+    imap.host=${?YONA_IMAP_HOST}
+    imap.ssl=${?YONA_IMAP_SSL}
+    imap.user=${?YONA_IMAP_USER}
+    imap.address=${?YONA_IMAP_ADDRESS}
+    imap.password=${?YONA_IMAP_PASSWORD}
+    imap.folder=${?YONA_IMAP_FOLDER}
+
+    # Production configuration
+    %prod.http.port=${?YONA_PROD_HTTP_PORT}
+    %prod.application.log=${?YONA_PROD_LOG_LEVEL}
+    %prod.application.mode=${?YONA_PROD_MODE}
+
+    # User uploaded temporary files cleanup schedule
+    # application.temporaryfiles.keep-up.time=${?YONA_TEMP_FILES_CLEANUP_TIME}
+
+    # Notification
+    application.notification.bymail.interval=${?YONA_NOTIFICATION_MAIL_INTERVAL}
+    application.notification.bymail.delay=${?YONA_NOTIFICATION_MAIL_DELAY}
+    application.notification.bymail.recipientLimit=${?YONA_NOTIFICATION_MAIL_RECIPIENT_LIMIT}
+    application.notification.bymail.hideAddress=${?YONA_NOTIFICATION_MAIL_HIDE_ADDRESS}
+    application.notification.draft-time=${?YONA_NOTIFICATION_DRAFT_TIME}
+    # application.notification.keep-time=${?YONA_NOTIFICATION_KEEP_TIME}
+
+    # Software Update
+    application.update.notification.interval=${?YONA_UPDATE_NOTIFICATION_INTERVAL}
+    application.update.check.use=${?YONA_UPDATE_CHECK_USE}
+    application.update.repositoryUrl=${?YONA_UPDATE_REPOSITORY_URL}
+    application.update.releaseUrlFormat=${?YONA_UPDATE_RELEASE_URL_FORMAT}
+
+    # Play and Akka thread pool configurations remain unchanged as they are not typically
+    # set via environment variables. They are left as-is in the configuration.
+
+    # No referrer information leak
+    application.noreferrer=${?YONA_NO_REFERRER}
+
+    # Display private repositories
+    application.displayPrivateRepositories=${?YONA_DISPLAY_PRIVATE_REPOS}
+
+    # Hide project listing
+    application.hide.project.listing=${?YONA_HIDE_PROJECT_LISTING}
+
+    # Default project scope
+    project.default.scope.when.create=${?YONA_DEFAULT_PROJECT_SCOPE}
+
+    # Display user email
+    application.show.user.email=${?YONA_SHOW_USER_EMAIL}
+
+    # Google Analytics
+    application.send.yona.usage=${?YONA_SEND_USAGE_DATA}
+
+    # Github Migration
+    github.allow.migration=${?YONA_GITHUB_MIGRATION_ALLOWED}
+    github.client.id=${?YONA_GITHUB_CLIENT_ID}
+    github.client.secret=${?YONA_GITHUB_CLIENT_SECRET}
+
+    # Attachment Upload File Size Limit
+    application.maxFileSize=${?YONA_MAX_FILE_SIZE}
+
+    # Project Creation Menu Settings
+    project.creation.default.menus=${?YONA_PROJECT_CREATION_MENUS}
+
+    # Social Login Support
+    application.use.social.login.only=${?YONA_USE_SOCIAL_LOGIN_ONLY}
+    application.use.social.login.name.sync=${?YONA_SOCIAL_LOGIN_NAME_SYNC}
+    application.social.login.support=${?YONA_SOCIAL_LOGIN_PROVIDERS}
+
+    # Custom link to navigation bar
+    application.navbar.custom.link.name=${?YONA_NAVBAR_CUSTOM_LINK_NAME}
+    application.navbar.custom.link.url=${?YONA_NAVBAR_CUSTOM_LINK_URL}
+
+    # LDAP Login Support
+    application.use.ldap.login.supoort=${?YONA_USE_LDAP_LOGIN}
+    ldap {
+        host=${?YONA_LDAP_HOST}
+        port=${?YONA_LDAP_PORT}
+        protocol=${?YONA_LDAP_PROTOCOL}
+        baseDN=${?YONA_LDAP_BASE_DN}
+        distinguishedNamePostfix=${?YONA_LDAP_DN_POSTFIX}
+        loginProperty=${?YONA_LDAP_LOGIN_PROPERTY}
+        displayNameProperty=${?YONA_LDAP_DISPLAY_NAME_PROPERTY}
+        userNameProperty=${?YONA_LDAP_USERNAME_PROPERTY}
+        emailProperty=${?YONA_LDAP_EMAIL_PROPERTY}
+        options {
+          useEmailBaseLogin=${?YONA_LDAP_USE_EMAIL_BASE_LOGIN}
+          fallbackToLocalLogin=${?YONA_LDAP_FALLBACK_TO_LOCAL_LOGIN}
+          englishNameAttributeName=${?YONA_LDAP_ENGLISH_NAME_ATTRIBUTE}
+        }
+    }
+
+    # Slack Message Color
+    slack {
+        NEW_ISSUE=${?YONA_SLACK_COLOR_NEW_ISSUE}
+        ISSUE_STATE_CHANGED=${?YONA_SLACK_COLOR_ISSUE_STATE_CHANGED}
+        ISSUE_ASSIGNEE_CHANGED=${?YONA_SLACK_COLOR_ISSUE_ASSIGNEE_CHANGED}
+        ISSUE_BODY_CHANGED=${?YONA_SLACK_COLOR_ISSUE_BODY_CHANGED}
+        ISSUE_MOVED=${?YONA_SLACK_COLOR_ISSUE_MOVED}
+        ISSUE_MILESTONE_CHANGED=${?YONA_SLACK_COLOR_ISSUE_MILESTONE_CHANGED}
+        NEW_COMMENT=${?YONA_SLACK_COLOR_NEW_COMMENT}
+        COMMENT_UPDATED=${?YONA_SLACK_COLOR_COMMENT_UPDATED}
+        NEW_PULL_REQUEST=${?YONA_SLACK_COLOR_NEW_PULL_REQUEST}
+        PULL_REQUEST_STATE_CHANGED=${?YONA_SLACK_COLOR_PULL_REQUEST_STATE_CHANGED}
+        PULL_REQUEST_MERGED=${?YONA_SLACK_COLOR_PULL_REQUEST_MERGED}
+        PULL_REQUEST_COMMIT_CHANGED=${?YONA_SLACK_COLOR_PULL_REQUEST_COMMIT_CHANGED}
+        PULL_REQUEST_REVIEW_STATE_CHANGED=${?YONA_SLACK_COLOR_PULL_REQUEST_REVIEW_STATE_CHANGED}
+    }
+
+    include "social-login.conf"
+  social-login.conf: |
+    play-authenticate {
+      accountMergeEnabled = false
+      accountMergeEnabled = ${?YONA_SOCIAL_LOGIN_ACCOUNT_MERGE_ENABLED}
+
+      accountAutoLink = true
+      accountAutoLink = ${?YONA_SOCIAL_LOGIN_ACCOUNT_AUTO_LINK}
+
+      google {
+        redirectUri {
+          secure = false
+          secure = ${?YONA_SOCIAL_LOGIN_GOOGLE_REDIRECT_URI_SECURE}
+        }
+        clientId = "300340907286-8gr74ghhenrqgk2ioavjip36qm2bbvn1.apps.googleusercontent.com"
+        clientId = ${?YONA_SOCIAL_LOGIN_GOOGLE_CLIENT_ID}
+        clientSecret = "ocFoKh7De6nDQm1x-lGxcGRO"
+        clientSecret = ${?YONA_SOCIAL_LOGIN_GOOGLE_CLIENT_SECRET}
+      }
+
+      github {
+        redirectUri {
+          secure = false
+          secure = ${?YONA_SOCIAL_LOGIN_GITHUB_REDIRECT_URI_SECURE}
+        }
+        scope = "user:email"
+        scope = ${?YONA_SOCIAL_LOGIN_GITHUB_SCOPE}
+        clientId = "add60851e36488138581"
+        clientId = ${?YONA_SOCIAL_LOGIN_GITHUB_CLIENT_ID}
+        clientSecret = "3f9472dcd7cb4c3c09e06b03f97f1b5fe2315af3"
+        clientSecret = ${?YONA_SOCIAL_LOGIN_GITHUB_CLIENT_SECRET}
+      }
+    }
+  application-logger.xml: |
+    <configuration>
+      <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
+      <appender name="ACCESS_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+          <file>${yona.data}/logs/access.log</file>
+          <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+              <fileNamePattern>${yona.data}/logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
+              <maxHistory>30</maxHistory>
+          </rollingPolicy>
+          <encoder>
+              <pattern>%message%n</pattern>
+          </encoder>
+      </appender>
+      <appender name="APPLICATION_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+          <file>${yona.data}/logs/application.log</file>
+          <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+              <fileNamePattern>${yona.data}/logs/application.%d{yyyy-MM-dd}.log</fileNamePattern>
+              <maxHistory>30</maxHistory>
+          </rollingPolicy>
+          <encoder>
+              <pattern>%date - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
+          </encoder>
+      </appender>
+      <appender name="MAIL_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+          <file>${yona.data}/logs/mail.log</file>
+          <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+              <fileNamePattern>${yona.data}/logs/mail.%d{yyyy-MM-dd}.log</fileNamePattern>
+              <maxHistory>30</maxHistory>
+          </rollingPolicy>
+          <encoder>
+              <pattern>%date - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
+          </encoder>
+      </appender>
+      <appender name="ROOT_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+          <file>${yona.data}/logs/root.log</file>
+          <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+              <fileNamePattern>${yona.data}/logs/root.%d{yyyy-MM-dd}.log</fileNamePattern>
+              <maxHistory>30</maxHistory>
+          </rollingPolicy>
+          <encoder>
+              <pattern>%date - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
+          </encoder>
+      </appender>
+      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+          <encoder>
+              <pattern>%coloredLevel %logger{15} - %message%n%xException{5}</pattern>
+          </encoder>
+      </appender>
+      <root level="ERROR">
+          <appender-ref ref="STDOUT" />
+          <appender-ref ref="ROOT_LOG_FILE" />
+      </root>
+      <logger name="play" level="WARNING">
+          <appender-ref ref="APPLICATION_LOG_FILE" />
+      </logger>
+      <logger name="application" level="WARNING">
+          <appender-ref ref="APPLICATION_LOG_FILE" />
+          <!-- for k8s logs -->
+          <appender-ref ref="STDOUT" />
+      </logger>
+      <logger name="access" level="INFO">
+          <appender-ref ref="ACCESS_LOG_FILE" />
+      </logger>
+      <logger name="mail" level="INFO">
+          <appender-ref ref="MAIL_LOG_FILE" />
+      </logger>
+      <logger name="info.schleichardt.play2.mail" level="WARNING">
+          <appender-ref ref="STDOUT" />
+      </logger>
+    </configuration>
