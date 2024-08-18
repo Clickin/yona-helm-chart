@@ -1,7 +1,7 @@
 apiVersion: v2
 name: yona
-description: Yona is a web-based project hosting software. 
-
+description: Yona is a web-based project hosting software.
+icon: https://avatars.githubusercontent.com/u/16770912
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
